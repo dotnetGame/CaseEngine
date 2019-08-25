@@ -1,2 +1,2 @@
 # CaseEngine
-A MMOG server framework 
+A fast ECS framework 
