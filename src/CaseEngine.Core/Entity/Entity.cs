@@ -5,29 +5,17 @@ using System.Text;
 
 namespace CaseEngine
 {
-    public struct EntityIndex
-    {
-        public int ChunkIndex { get; set; }
-        public int ChunkOffset { get; set; }
-    }
-
     public class Entity
     {
-        public EntityArchetype Archetype { get; set; }
-
-        public Guid EntityGuid { get; set; }
-
-        public EntityIndex EntityIndex { get; set; }
+        public int EntityId { get; set; }
 
         private EntityManager _entityManager;
         
 
         public Entity(EntityManager manager)
         {
-            Archetype = new EntityArchetype { TypeIndex = 0 };
-            EntityGuid = new Guid();
+            EntityId = -1;
             _entityManager = manager;
-            EntityIndex = new EntityIndex { ChunkIndex = -1, ChunkOffset = -1 };
         }
 
         public void AddComponent(IComponent component)

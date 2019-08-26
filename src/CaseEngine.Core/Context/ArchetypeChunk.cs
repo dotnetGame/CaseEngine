@@ -10,6 +10,7 @@ namespace CaseEngine
         public const int CHUNK_MAX_ENTITIES = 256;
         public IList[] _data;
         public int _count;
+        public int _componentCount;
 
         public ArchetypeChunk(List<Type> types)
         {
@@ -19,6 +20,7 @@ namespace CaseEngine
                 _data[i] = Array.CreateInstance(types[i], CHUNK_MAX_ENTITIES);
             }
             _count = 0;
+            _componentCount = types.Count;
         }
 
         public int Capacity
@@ -65,9 +67,17 @@ namespace CaseEngine
 
             return ret;
         }
-        public bool Dealloc(int offset)
+        public void Dealloc(int offset)
         {
-            return true;
+            if (offset < 0 || offset >= _count) return;
+            for (int i = 0; i < _componentCount; ++i)
+            {
+                for (int j = offset; j < _count - 1; ++j)
+                {
+                    _data[i][j] = _data[i][j + 1];
+                }
+            }
+            _count -= 1;
         }
     }
 }
