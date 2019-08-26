@@ -14,28 +14,22 @@ namespace CaseEngine
         public EntityManager()
         {
             _archetypeManager = new ArchetypeManager();
-            _entityDataManager = new EntityDataManager();
+            _entityDataManager = new EntityDataManager(_archetypeManager);
         }
 
         public EntityArchetype CreateArchetype(params Type[] types)
         {
-            foreach(var t in types)
-            {
-                if (!t.GetInterfaces().Contains(typeof(IComponent)))
-                    throw new ArgumentException("Type does not implement IComponent.");
-
-
-            }
+            return _archetypeManager.CreateArchetype(types);
         }
 
         public Entity CreateEntity()
         {
             Entity e = new Entity(this);
-            e.Archetype = _archetypeManager.AddArchetype(new ComponentTypeList());
+            e.Archetype = _archetypeManager.CreateArchetype(new Type[0]);
             if (e.Archetype.TypeIndex != 0)
             {
                 var typeList = _archetypeManager.GetArchetypeTypeList(e.Archetype);
-                e.EntityIndex = _entityDataManager.Alloc(typeList);
+                e.EntityIndex = _entityDataManager.Alloc(e.Archetype);
             }
             return e;
         }
@@ -49,20 +43,29 @@ namespace CaseEngine
 
         }
 
-        public IComponent GetComponent<T>(Entity entity)
+        public T GetComponent<T>(Entity entity)
         {
-            return null;
+            return (T)_entityDataManager.GetComponent(typeof(T), entity.EntityIndex.ChunkIndex, entity.EntityIndex.ChunkOffset);
         }
 
         public void AddComponent(Entity entity, IComponent component)
         {
-            ComponentType componentType = _componentTypeManager.AddComponentType(component);
+            var typeList = _archetypeManager.GetArchetypeTypeList(entity.Archetype);
 
-            ComponentTypeList typeList = (ComponentTypeList)_archetypeManager.GetArchetypeTypeList(entity.Archetype).Clone();
+            // remove old alloc
+            if (entity.Archetype != 0)
+            {
+            }
 
-            typeList.AddComponentType(componentType);
+            // update archetype
+            typeList.Add(component.GetType());
+            entity.Archetype = _archetypeManager.CreateArchetype(typeList.ToArray());
 
-            entity.Archetype = _archetypeManager.AddArchetype(typeList);
+            // alloc new object
+            if (entity.Archetype != 0)
+            {
+                entity.EntityIndex = _entityDataManager.Alloc(entity.Archetype);
+            }
         }
 
         public void RemoveComponent<T>(Entity entity)

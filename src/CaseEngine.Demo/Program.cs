@@ -18,7 +18,13 @@ namespace CaseEngine.Demo
             Context context = new Context();
             Entity player = context.CreateEntity();
             player.AddComponent(new PositionComponent { x = 0, y = 0 });
+            System.Console.WriteLine(player.GetComponent<PositionComponent>().x);
 
+            player.SetComponent<PositionComponent>(new PositionComponent { x = 5, y = 5 });
+            System.Console.WriteLine(player.HasComponent<PositionComponent>());
+
+            player.RemoveComponent<PositionComponent>();
+            System.Console.WriteLine(player.HasComponent<PositionComponent>());
 
         }
     }

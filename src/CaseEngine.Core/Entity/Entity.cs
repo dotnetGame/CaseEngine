@@ -17,8 +17,10 @@ namespace CaseEngine
 
         public Guid EntityGuid { get; set; }
 
+        public EntityIndex EntityIndex { get; set; }
+
         private EntityManager _entityManager;
-        private EntityIndex EntityIndex { get; set; }
+        
 
         public Entity(EntityManager manager)
         {
@@ -31,6 +33,11 @@ namespace CaseEngine
         public void AddComponent(IComponent component)
         {
             _entityManager.AddComponent(this, component);
+        }
+
+        public T GetComponent<T>()
+        {
+            return _entityManager.GetComponent<T>(this);
         }
 
         /*

@@ -9,6 +9,21 @@ namespace CaseEngine
     {
         public int TypeIndex { get; set; }
 
+        public EntityArchetype(int value)
+        {
+            TypeIndex = value;
+        }
+
+        public static implicit operator int(EntityArchetype w)
+        {
+            return w.TypeIndex;
+        }
+
+        public static implicit operator EntityArchetype(int w)
+        {
+            return new EntityArchetype(w);
+        }
+
         public bool Equals(EntityArchetype other)
         {
             return TypeIndex == other.TypeIndex;

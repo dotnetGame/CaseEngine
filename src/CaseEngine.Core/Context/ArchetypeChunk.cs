@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
@@ -6,22 +7,18 @@ namespace CaseEngine
 {
     public class ArchetypeChunk
     {
-        public const int CHUNK_MAX_ENTITIES = 128;
-        public Array[] _data;
+        public const int CHUNK_MAX_ENTITIES = 256;
+        public IList[] _data;
         public int _count;
-        public bool[] _enableList;
 
-        public ArchetypeChunk(EntityArchetype entityArchetype)
+        public ArchetypeChunk(List<Type> types)
         {
-            //_data = new Array[entityArchetype.ComponentCount()];
-            //var typeList = entityArchetype.GetComponentTypes();
-            //for (int i = 0; i < entityArchetype.ComponentCount(); ++i)
-            //{
-            //    _data[i] = Array.CreateInstance(typeList[i].ToType(), CHUNK_MAX_ENTITIES);
-            //}
-            //_count = 0;
-            //_enableList = new bool[CHUNK_MAX_ENTITIES];
-            //_enableList.SetValue(false, 0, CHUNK_MAX_ENTITIES);
+            _data = new IList[types.Count];
+            for (int i = 0; i < types.Count; ++i)
+            {
+                _data[i] = Array.CreateInstance(types[i], CHUNK_MAX_ENTITIES);
+            }
+            _count = 0;
         }
 
         public int Capacity
@@ -53,17 +50,22 @@ namespace CaseEngine
             }
         }
 
-        public bool Alloc()
+        public IComponent GetComponent(int entityOffset,int componentIndex)
+        {
+            return (IComponent)_data[componentIndex][entityOffset];
+        }
+
+        public int Alloc()
         {
             if (_count >= CHUNK_MAX_ENTITIES)
-                return false;
+                return -1;
 
-            _enableList[_count] = true;
+            int ret = _count;
             _count += 1;
 
-            return true;
+            return ret;
         }
-        public bool Dealloc(Entity entity)
+        public bool Dealloc(int offset)
         {
             return true;
         }

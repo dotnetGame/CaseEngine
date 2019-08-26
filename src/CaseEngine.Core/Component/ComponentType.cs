@@ -8,6 +8,21 @@ namespace CaseEngine
     {
         public int TypeIndex { get; set; }
 
+        public ComponentType(int value)
+        {
+            TypeIndex = value;
+        }
+
+        public static implicit operator int(ComponentType w)
+        {
+            return w.TypeIndex;
+        }
+
+        public static implicit operator ComponentType(int w)
+        {
+            return new ComponentType(w);
+        }
+
         public bool Equals(ComponentType other)
         {
             return TypeIndex == other.TypeIndex;

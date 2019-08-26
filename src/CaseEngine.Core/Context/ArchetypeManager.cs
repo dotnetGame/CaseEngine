@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace CaseEngine
@@ -21,15 +23,26 @@ namespace CaseEngine
         }
     }
 
-    public class ComponentTypeList : IEquatable<ComponentTypeList>, ICloneable
+    public class ComponentTypeList : IEquatable<ComponentTypeList>, IEnumerable<ComponentType>, ICloneable
     {
         public List<ComponentType> TypeList { get; set; } = new List<ComponentType>();
 
-        public void AddComponentType(ComponentType t)
+        public ComponentTypeList()
+        {
+
+        }
+
+        public ComponentTypeList(ComponentType[] list)
+        {
+            TypeList.InsertRange(0, list);
+        }
+
+        public void Add(ComponentType t)
         {
             if (!TypeList.Contains(t))
                 TypeList.Add(t);
             TypeList.Sort();
+            TypeList = TypeList.Distinct().ToList();
         }
 
         public bool Equals(ComponentTypeList other)
@@ -49,42 +62,69 @@ namespace CaseEngine
             ComponentTypeList newTypeList = new ComponentTypeList { TypeList = TypeList };
             return newTypeList;
         }
+
+        public IEnumerator<ComponentType> GetEnumerator()
+        {
+            return ((IEnumerable<ComponentType>)TypeList).GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return ((IEnumerable<ComponentType>)TypeList).GetEnumerator();
+        }
     }
 
     public class ArchetypeManager
     {
-        private ComponentTypeManager _componentTypeManager;
+        private List<Type> _componentTypes;
         private List<ComponentTypeList> _entityArchetypes;
         public ArchetypeManager()
         {
-            _componentTypeManager = new ComponentTypeManager();
+            _componentTypes = new List<Type>();
             _entityArchetypes = new List<ComponentTypeList>();
             _entityArchetypes.Add(new ComponentTypeList());
         }
 
-        public EntityArchetype CreateArchetype(params Type[] componentTypes)
+        public EntityArchetype CreateArchetype(params Type[] types)
         {
-            foreach (var t in componentTypes)
+            List<ComponentType> componentTypes = new List<ComponentType>();
+            foreach (var t in types)
             {
-                if (!_componentTypeManager.HasComponentType(t))
+                if (!t.GetInterfaces().Contains(typeof(IComponent)))
+                    throw new ArgumentException("Type does not implement IComponent.");
+
+                var idx = -1;
+                if (_componentTypes.Contains(t))
                 {
-                    _componentTypeManager.AddComponentType(t);
+                    idx = _componentTypes.IndexOf(t);
                 }
+                else
+                {
+                    _componentTypes.Add(t);
+                    idx = _componentTypes.Count - 1;
+                }
+                componentTypes.Add(idx);
             }
 
-            for (int i = 0; i < _entityArchetypes.Count; ++i)
+            componentTypes.Sort();
+
+            var componentTypeList = new ComponentTypeList { TypeList = componentTypes.Distinct().ToList() };
+
+            if (_entityArchetypes.Contains(componentTypeList))
             {
-                if (t.Equals(_entityArchetypes[i]))
-                    return new EntityArchetype { TypeIndex = i };
+                return _entityArchetypes.IndexOf(componentTypeList);
             }
-
-            _entityArchetypes.Add(t);
-            return new EntityArchetype { TypeIndex = _entityArchetypes.Count - 1 };
+            else
+            {
+                _entityArchetypes.Add(componentTypeList);
+                return _entityArchetypes.Count - 1;
+            }
         }
 
-        public ComponentTypeList GetArchetypeTypeList(EntityArchetype i)
+        public List<Type> GetArchetypeTypeList(EntityArchetype i)
         {
-            return _entityArchetypes[i.TypeIndex];
+            var componentTypeList = _entityArchetypes[i];
+            return (from eachComponentType in componentTypeList select _componentTypes[eachComponentType]).ToList();
         }
 
         public int GetArchetypeIndex(ComponentTypeList t)
