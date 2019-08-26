@@ -1,49 +1,41 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace CaseEngine
 {
     public class EntityManager
     {
-        private Dictionary<EntityArchetype, ArchetypeComponents> _components;
+        private ArchetypeManager _archetypeManager;
 
-        public EntityArchetype CreateArchetype(params Type[] componentTypes)
+        private EntityDataManager _entityDataManager;
+
+        public EntityManager()
         {
-            ComponentType[] types = new ComponentType[componentTypes.Length];
-            for (int i = 0; i < componentTypes.Length; ++i)
-            {
-                types[i] = ComponentType.From(componentTypes[i]);
-            }
-            return new EntityArchetype(types);
+            _archetypeManager = new ArchetypeManager();
+            _entityDataManager = new EntityDataManager();
         }
 
-        public EntityArchetype CreateArchetype(params IComponent[] components)
+        public EntityArchetype CreateArchetype(params Type[] types)
         {
-            ComponentType[] types = new ComponentType[components.Length];
-            for(int i= 0;i<components.Length;++i)
+            foreach(var t in types)
             {
-                types[i] = ComponentType.From(components[i]);
-            }
-            return new EntityArchetype(types);
-        }
+                if (!t.GetInterfaces().Contains(typeof(IComponent)))
+                    throw new ArgumentException("Type does not implement IComponent.");
 
-        public EntityArchetype CreateArchetype(params ComponentType[] componentTypes)
-        {
-            return new EntityArchetype(componentTypes);
+
+            }
         }
 
         public Entity CreateEntity()
         {
-            Entity e = new Entity();
-            if (_components.ContainsKey(e.Archetype))
+            Entity e = new Entity(this);
+            e.Archetype = _archetypeManager.AddArchetype(new ComponentTypeList());
+            if (e.Archetype.TypeIndex != 0)
             {
-                // _components[e.Archetype];
-            }
-            else
-            {
-                _components[e.Archetype] = new ArchetypeComponents();
-
+                var typeList = _archetypeManager.GetArchetypeTypeList(e.Archetype);
+                e.EntityIndex = _entityDataManager.Alloc(typeList);
             }
             return e;
         }
@@ -62,10 +54,15 @@ namespace CaseEngine
             return null;
         }
 
-        public void AddComponent<T>(Entity entity, IComponent component)
+        public void AddComponent(Entity entity, IComponent component)
         {
-            entity.Archetype.AddComponentType(ComponentType.From(component));
+            ComponentType componentType = _componentTypeManager.AddComponentType(component);
 
+            ComponentTypeList typeList = (ComponentTypeList)_archetypeManager.GetArchetypeTypeList(entity.Archetype).Clone();
+
+            typeList.AddComponentType(componentType);
+
+            entity.Archetype = _archetypeManager.AddArchetype(typeList);
         }
 
         public void RemoveComponent<T>(Entity entity)

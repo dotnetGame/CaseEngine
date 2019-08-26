@@ -5,74 +5,64 @@ using System.Text;
 
 namespace CaseEngine
 {
-    public class EntityArchetype
+    public struct EntityArchetype : IEquatable<EntityArchetype>
     {
-        private string _archetypeString;
-        private List<ComponentType> _types;
+        public int TypeIndex { get; set; }
 
-        public EntityArchetype()
+        public bool Equals(EntityArchetype other)
         {
-            _archetypeString = "";
-            _types = new List<ComponentType>();
-        }
-
-        public EntityArchetype(params ComponentType[] types)
-        {
-            string archetypeString = "";
-            foreach(var t in types)
-            {
-                archetypeString += t.GetName() + "#";
-            }
-            _archetypeString = archetypeString;
-            _types = new List<ComponentType>();
-            foreach (var t in types)
-            {
-                if (!_types.Contains(t))
-                    _types.Add(t);
-            }
-        }
-
-        public List<ComponentType> GetComponentTypes()
-        {
-            return _types;
-        }
-
-        public int EntitySize()
-        {
-            int ret = 0;
-            foreach(var eachComponentType in _types)
-            {
-                ret += Marshal.SizeOf(eachComponentType.ToType());
-            }
-
-            return ret;
-        }
-
-        public int ComponentSize(int i)
-        {
-            return Marshal.SizeOf(_types[i].ToType());
-        }
-
-        public int ComponentCount()
-        {
-            return _types.Count;
-        }
-
-        public void AddComponentType(ComponentType componentType)
-        {
-            if(!HasComponentType(componentType))
-                _types.Add(componentType);
-        }
-
-        public void RemoveComponentType(ComponentType componentType)
-        {
-            if (HasComponentType(componentType))
-                _types.Remove(componentType);
-        }
-
-        public bool HasComponentType(ComponentType componentType)
-        {
-            return _types.Contains(componentType);
+            return TypeIndex == other.TypeIndex;
         }
     }
+    //public class EntityArchetype
+    //{
+    //    private List<ComponentType> _types;
+
+    //    public EntityArchetype()
+    //    {
+    //        _types = new List<ComponentType>();
+    //    }
+
+    //    public EntityArchetype(params ComponentType[] types)
+    //    {
+    //        _types = new List<ComponentType>();
+    //        foreach (var t in types)
+    //        {
+    //            if (!_types.Contains(t))
+    //                _types.Add(t);
+    //        }
+
+    //        _types.Sort();
+    //    }
+
+    //    public List<ComponentType> GetComponentTypes()
+    //    {
+    //        return _types;
+    //    }
+
+    //    public int ComponentCount()
+    //    {
+    //        return _types.Count;
+    //    }
+
+    //    public void AddComponentType(ComponentType componentType)
+    //    {
+    //        if(!HasComponentType(componentType))
+    //        {
+    //            _types.Add(componentType);
+    //            _types.Sort();
+    //        }
+    //    }
+
+    //    public void RemoveComponentType(ComponentType componentType)
+    //    {
+    //        if (HasComponentType(componentType))
+    //            _types.Remove(componentType);
+    //    }
+
+    //    public bool HasComponentType(ComponentType componentType)
+    //    {
+    //        return _types.Contains(componentType);
+    //    }
+    //}
 }

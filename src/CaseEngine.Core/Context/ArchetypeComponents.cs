@@ -6,7 +6,13 @@ namespace CaseEngine
 {
     public class ArchetypeComponents
     {
+        private EntityArchetype _entityArchetype;
         private List<ArchetypeChunk> _chunks;
+
+        public ArchetypeComponents(EntityArchetype entityArchetype)
+        {
+            _entityArchetype = entityArchetype;
+        }
 
         public void AllocEntity(Entity entity)
         {
@@ -19,7 +25,7 @@ namespace CaseEngine
                 }
             }
 
-            var newChunk = new ArchetypeChunk();
+            var newChunk = new ArchetypeChunk(_entityArchetype);
             newChunk.Alloc(entity);
             _chunks.Add(newChunk);
         }

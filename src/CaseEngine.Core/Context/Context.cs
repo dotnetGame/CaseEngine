@@ -4,16 +4,25 @@ using System.Text;
 
 namespace CaseEngine
 {
-    public class Context : IContext
+    public class Context
     {
-        public IEntity CreateEntity()
+        public EntityManager _entityManager;
+        public Context()
         {
-            throw new NotImplementedException();
+            _entityManager = new EntityManager();
         }
 
-        public void DestroyEntity(IEntity entity)
+        public Entity CreateEntity()
         {
-            throw new NotImplementedException();
+            if (_entityManager != null)
+                return _entityManager.CreateEntity();
+            else
+                return null;
+        }
+
+        public void AddComponent(Entity entity, IComponent component)
+        {
+            _entityManager.AddComponent(entity, component);
         }
     }
 }

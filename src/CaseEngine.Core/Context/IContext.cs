@@ -6,8 +6,8 @@ namespace CaseEngine
 {
     public interface IContext
     {
-        IEntity CreateEntity();
+        Entity CreateEntity();
 
-        void DestroyEntity(IEntity entity);
+        void DestroyEntity(Entity entity);
     }
 }
